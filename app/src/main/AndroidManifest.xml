@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.target.runningapp">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/app_logo"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/app_logo"
+        android:supportsRtl="false"
+        android:screenOrientation="portrait"
+        android:theme="@style/AppTheme">
+        <activity android:name=".ui.MapActivity">
+
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyDTA_r4q8-VwT4OhQyen3LjTH5uE5ZBN-I" />
+
+        <activity android:name=".ui.IntroSliderActivity">
+
+        </activity>
+        <activity android:name=".ui.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.CreateAccountActivity" />
+        <activity android:name=".ui.AuthActivity" />
+    </application>
+
+</manifest>
