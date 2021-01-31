@@ -1,18 +1,23 @@
 package com.target.runningapp.ui;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -26,6 +31,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.core.Repo;
+import com.target.runningapp.ProfileActivity;
+import com.target.runningapp.RunService;
+import com.target.runningapp.model.HistoryMission;
 import com.target.runningapp.viewModel.MapViewModel;
 import com.target.runningapp.R;
 import com.target.runningapp.model.missions.StopBombMission;
@@ -45,15 +55,19 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 //diff level and firebase
-//rout
+//mspeed & mDistance & mTimer
 
-
-public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, Toolbar.OnMenuItemClickListener {
     private MapViewModel mViewModel;
     GoogleMap mGoogleMap;
     MapView mMapView;
     ImageView cameraToLocation;
     TextView mTimer;
+    TextView mDistance;
+    TextView mSpeed;
+    Toolbar mToolbar;
+    int seconds=0;
+
     LatLng locationLatLong;
 
     StopBombMission mMission = new StopBombMission( 1);
@@ -69,8 +83,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     Projection mProjection;
     Button startMission;
     Dialog dialog;
+    LatLng oldLocation;
+
+    float totalDistance=0;
     boolean missionSeted = false;
     boolean inMission = false;
+
 
 
     @Override
@@ -81,6 +99,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMapView = findViewById(R.id.mapView);
         cameraToLocation = findViewById(R.id.cameraToLocation);
         mTimer = findViewById(R.id.timer);
+        mDistance=findViewById(R.id.distance);
+        mSpeed=findViewById(R.id.speed);
+        mToolbar = findViewById(R.id.ToolBar);
+        mToolbar.setOnMenuItemClickListener(this);
+
         cameraToLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,11 +119,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 inMission = true;
                 mGoogleMap.clear();
                 findViewById(R.id.mission_starter).setVisibility(View.INVISIBLE);
-                mTimer.setVisibility(View.VISIBLE);
+                findViewById(R.id.statistics).setVisibility(View.VISIBLE);
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationLatLong, 15f));
                 mProjection = mGoogleMap.getProjection();
                 setBombs(mMission);
-                mViewModel.startTimer(mMission.getTime());
             }
         });
 
@@ -114,29 +136,19 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mViewModel.getTimerLiveData().observe(this, new Observer<Long>() {
             @Override
             public void onChanged(Long aLong) {
+                seconds++;
                 mTimer.setText((aLong / 1000) / 60 + " : " + (aLong / 1000) % 60);
+                mDistance.setText(String.format("%.2f",totalDistance/1000)+" Km");
+                mSpeed.setText(String.format("%.2f",(totalDistance)/(seconds))+" m/sec");
+
                 if (aLong < 1000) {
-                    youLose();
-                    mMarkerBombs.clear();
-                    mStoppedBombs.clear();
-                    pickedPoints.clear();
-                    mGoogleMap.clear();
-                    inMission = false;
-                    missionSeted = false;
-                    mTimer.setVisibility(View.INVISIBLE);
-                    mViewModel.stopTimer();
+                    youLose(seconds,totalDistance);
+                    reset();
                 }
 
                 else if (mStoppedBombs.size() >= mMission.getNumOfMissions()) {
-                    youWin();
-                    mMarkerBombs.clear();
-                    mStoppedBombs.clear();
-                    pickedPoints.clear();
-                    mGoogleMap.clear();
-                    inMission = false;
-                    missionSeted = false;
-                    mTimer.setVisibility(View.INVISIBLE);
-                    mViewModel.stopTimer();
+                    youWin(seconds,totalDistance);
+                    reset();
                 }
             }
         });
@@ -152,6 +164,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     missionSeted = true;
                 }
                 if (inMission) {
+                    if(oldLocation!=null){
+                        float[] results = new float[1];
+                        Location.distanceBetween(oldLocation.latitude, oldLocation.longitude,
+                                locationLatLong.latitude, locationLatLong.longitude, results);
+                        totalDistance=totalDistance+results[0];
+                        mGoogleMap.addPolyline(new PolylineOptions().add(locationLatLong,oldLocation).width(5).color(Color.rgb(85,136,163)));
+                    }
+                    oldLocation=locationLatLong;
+
                     isBombStopped(locationLatLong).subscribe(new io.reactivex.Observer<Integer>() {
                         @Override
                         public void onSubscribe(Disposable d) {
@@ -248,8 +269,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onSuccess(ArrayList<LatLng> latLngs) {
                         ArrayList<MarkerOptions> markerOptions = prepareBombs(latLngs);
-                        for (MarkerOptions m : markerOptions) {
-                            mMarkerBombs.add(mGoogleMap.addMarker(m));
+                        if(markerOptions.size()==0){
+                            reset();
+                            Toast.makeText(MapActivity.this, "Move to area with many public streets", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            for (MarkerOptions m : markerOptions) {
+                                mMarkerBombs.add(mGoogleMap.addMarker(m));
+                            }
+                            mViewModel.startTimer(mMission.getTime());
                         }
                     }
 
@@ -317,19 +345,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
 
         for(int i=0 ; i<mMission.getNumOfMissions();i++){
+            if(allPickedPoints.size()<mMission.getNumOfMissions())break;
             pickedPoints.add(allPickedPoints.get(new Random().nextInt(allPickedPoints.size()-1)));
         }
         return pickedPoints;
     }
 
 
-    public void youWin() {
+    public void youWin(int time, float distance) {
         //save km time xp at server
+        mViewModel.submitMission(new HistoryMission(time, distance, true));
         showDialog("Mission Complete");
     }
 
-    public void youLose() {
+    public void youLose(int time, float distance) {
         //save km time xp at server
+        mViewModel.submitMission(new HistoryMission(time, distance, false));
         showDialog("Mission failed");
     }
 
@@ -346,6 +377,37 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
         dialog.show();
+    }
+
+    public void reset(){
+        mMarkerBombs.clear();
+        mStoppedBombs.clear();
+        pickedPoints.clear();
+        mGoogleMap.clear();
+        inMission = false;
+        missionSeted = false;
+        oldLocation=null;
+        totalDistance=0;
+        findViewById(R.id.statistics).setVisibility(View.INVISIBLE);
+        mViewModel.stopTimer();
+    }
+
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.profile:
+                startActivity(new Intent(this, ProfileActivity.class));
+                break;
+
+            case R.id.logOut:
+                mViewModel.signOut();
+                startActivity(new Intent(this, AuthActivity.class));
+                finish();
+                break;
+
+        }
+        return false;
     }
 
     @Override
@@ -368,11 +430,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     quit.dismiss();
                 }
             });
+            quit.show();
         }
 
         else
             super.onBackPressed();
     }
 
+    @Override
+    protected void onPause() {
+        ContextCompat.startForegroundService(this,new Intent(this, RunService.class));
+        super.onPause();
 
+    }
 }

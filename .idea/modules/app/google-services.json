@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "482169584184",
+    "firebase_url": "https://runnermission-default-rtdb.firebaseio.com",
     "project_id": "runnermission",
     "storage_bucket": "runnermission.appspot.com"
   },

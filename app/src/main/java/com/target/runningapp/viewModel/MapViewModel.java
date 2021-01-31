@@ -30,6 +30,9 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.target.runningapp.model.HistoryMission;
+import com.target.runningapp.repositories.AuthRepository;
+import com.target.runningapp.repositories.HistoryRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +50,9 @@ public class MapViewModel extends ViewModel {
     LocationRequest mLocationRequest;
     LocationCallback mLocationCallback;
 
+    AuthRepository authRepository;
+    HistoryRepository historyRepository;
+
     ArrayList<MarkerOptions> missions=new ArrayList<>();
     MutableLiveData<Location> mLocationMutableLiveData;
     MutableLiveData<Long> mTimerMutableLiveData;
@@ -56,6 +62,8 @@ public class MapViewModel extends ViewModel {
 
     public void init(Context context){
         this.mContext=context;
+        authRepository=AuthRepository.getInstance(context);
+        historyRepository=HistoryRepository.getInstance();
         mLocationMutableLiveData=new MutableLiveData<>();
         mTimerMutableLiveData=new MutableLiveData<>();
         mLocationProviderClient = LocationServices.getFusedLocationProviderClient(mContext);
@@ -141,21 +149,6 @@ public class MapViewModel extends ViewModel {
         }
     }
 
-    /*public ArrayList<CircleOptions> prepareMission(LatLng player) {
-        LatLng missionLoc;
-        double lat;
-        double lng;
-        for (int i = 0; i < 20; i++) {
-            lat = player.latitude - (new Random().nextDouble() * 0.005) + (new Random().nextDouble() * 0.005);
-            lng = player.longitude - (new Random().nextDouble() * 0.005) + (new Random().nextDouble() * 0.005);
-            missionLoc = new LatLng(lat, lng);
-            new MarkerOptions().position(missionLoc).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-            missions.add(new CircleOptions().center(missionLoc).radius(3).strokeColor(Color.rgb(255, 255, 255)).fillColor(Color.rgb(255, 255, 255)));
-        }
-        return missions;
-    }*/
-
-
     public ArrayList<MarkerOptions> prepareMissions(LatLng player) {
         LatLng missionLoc;
         double lat;
@@ -170,6 +163,8 @@ public class MapViewModel extends ViewModel {
         }
         return missions;
     }
+
+
 
     public void startTimer(int i){
         countDownTimer=new CountDownTimer(i*1000*60, 1000) {
@@ -186,7 +181,16 @@ public class MapViewModel extends ViewModel {
     }
 
     public void stopTimer(){
-        countDownTimer.cancel();
+        if(countDownTimer!=null)
+            countDownTimer.cancel();
+    }
+
+    public void signOut(){
+        authRepository.signOut();
+    }
+
+    public void submitMission(HistoryMission historyMission){
+        historyRepository.submitHistory(historyMission);
     }
 
 }

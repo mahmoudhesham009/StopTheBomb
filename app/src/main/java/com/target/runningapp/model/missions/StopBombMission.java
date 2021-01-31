@@ -1,14 +1,5 @@
 package com.target.runningapp.model.missions;
 
-import android.location.Location;
-
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.ArrayList;
-import java.util.Random;
-
 public class StopBombMission {
     int time;
     int numOfMissions;
@@ -18,11 +9,11 @@ public class StopBombMission {
 
 
     public StopBombMission(int level) {
-        this.level=level;
+        this.level = level;
         this.time = 15;
         this.numOfMissions = 2;
-        this.missionUpperRange=600;
-        this.missionLowerRanget=500;
+        this.missionUpperRange = 600;
+        this.missionLowerRanget = 500;
     }
 
     public int getTime() {
