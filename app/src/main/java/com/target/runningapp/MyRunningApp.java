@@ -9,7 +9,7 @@ public class MyRunningApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //createNotoficationChannal();
+        createNotoficationChannal();
     }
 
     private void createNotoficationChannal() {

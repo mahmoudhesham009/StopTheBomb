@@ -20,8 +20,9 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/_36ssp"
-        android:textColor="#000"
+        android:fontFamily="@font/aclonica"
         android:text="@string/app_name"
-        android:textStyle="bold|italic"/>
+        android:textColor="#000"
+        android:textSize="@dimen/_24ssp"
+        android:textStyle="bold" />
 </LinearLayout>

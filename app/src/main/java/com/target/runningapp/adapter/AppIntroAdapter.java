@@ -25,7 +25,7 @@ public class AppIntroAdapter extends PagerAdapter {
         this.context = context;
         this.addPage(R.drawable.ic_undraw_fitness_stats_sht6,context.getResources().getString(R.string.first_page));
         this.addPage(R.drawable.ic_undraw_map_light_3hjy,context.getResources().getString(R.string.second_page));
-        this.addPage(R.drawable.ic_undraw_nature_fun_n9lv,context.getResources().getString(R.string.third_page));
+        this.addPage(R.drawable.ic_undraw_working_out_6psf,context.getResources().getString(R.string.third_page));
     }
 
 

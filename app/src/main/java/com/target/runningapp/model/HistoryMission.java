@@ -2,18 +2,24 @@ package com.target.runningapp.model;
 
 import android.graphics.Bitmap;
 
+import com.target.runningapp.repositories.HistoryRepository;
+
 public class HistoryMission {
-    int Time;
+    long Time;
     float distance;
     boolean win;
 
-    public HistoryMission(int time, float distance, boolean win) {
+    public HistoryMission(){
+
+    }
+
+    public HistoryMission(long time, float distance, boolean win) {
         Time = time;
         this.distance = distance;
         this.win = win;
     }
 
-    public int getTime() {
+    public long getTime() {
         return Time;
     }
 

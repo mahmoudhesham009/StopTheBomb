@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.target.runningapp" >
+    package="com.target.runningapp">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 
-    /><application
+    <application
         android:name=".MyRunningApp"
         android:allowBackup="true"
         android:icon="@drawable/app_logo"
@@ -15,18 +16,19 @@
         android:roundIcon="@drawable/app_logo"
         android:screenOrientation="portrait"
         android:supportsRtl="false"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDTA_r4q8-VwT4OhQyen3LjTH5uE5ZBN-I" />
-
-
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".ProfileActivity" />
         <activity android:name=".ui.MapActivity" />
-        <activity android:name=".ui.IntroSliderActivity"/>
-        <activity android:name=".ui.SplashActivity" >
+        <activity android:name=".ui.IntroSliderActivity" />
+        <activity android:name=".ui.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,7 +38,7 @@
         <activity android:name=".ui.CreateAccountActivity" />
         <activity android:name=".ui.AuthActivity" />
 
-        <service android:name=".RunService" android:foregroundServiceType="location"/>
+        <service android:name=".RunService" />
     </application>
 
 </manifest>

@@ -1,22 +1,22 @@
-package com.target.runningapp.model.missions;
+package com.target.runningapp.model;
 
 public class StopBombMission {
-    int time;
+    long time;
     int numOfMissions;
     int level;
     int missionUpperRange;
     int missionLowerRanget;
 
 
-    public StopBombMission(int level) {
-        this.level = level;
-        this.time = 15;
-        this.numOfMissions = 2;
-        this.missionUpperRange = 600;
-        this.missionLowerRanget = 500;
+
+    public StopBombMission(long time, int numOfMissions, int missionUpperRange, int missionLowerRanget) {
+        this.time = time;
+        this.numOfMissions = numOfMissions;
+        this.missionUpperRange = missionUpperRange;
+        this.missionLowerRanget = missionLowerRanget;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 

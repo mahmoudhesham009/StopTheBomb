@@ -44,7 +44,7 @@ public class AuthActivity extends AppCompatActivity {
             public void onChanged(FirebaseUser firebaseUser) {
                 if(firebaseUser!=null){
                     Toast.makeText(getBaseContext(), "Welcome "+firebaseUser.getDisplayName(), Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(getBaseContext(), MapActivity.class));
+                    startActivity(new Intent(getBaseContext(), IntroSliderActivity.class));
                     finish();
                 }
             }
