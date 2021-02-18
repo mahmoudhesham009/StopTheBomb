@@ -1,12 +1,15 @@
 package com.target.runningapp.ui;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +20,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.Constraints;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -33,9 +41,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.target.runningapp.ProfileActivity;
 import com.target.runningapp.R;
-import com.target.runningapp.RunService;
+import com.target.runningapp.service.RunService;
 import com.target.runningapp.model.HistoryMission;
 import com.target.runningapp.model.Profile;
 import com.target.runningapp.model.StopBombMission;
@@ -55,8 +62,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-//gps
-//move button
 //ui
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, Toolbar.OnMenuItemClickListener {
@@ -73,7 +78,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     RunService mService;
     LatLng locationLatLong;
 
-    StopBombMission mMission=new StopBombMission(10,1,600,400);
+    StopBombMission mMission = new StopBombMission(10, 1, 600, 400);
     Profile mProfile;
 
 
@@ -110,10 +115,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mToolbar.setOnMenuItemClickListener(this);
 
 
+        AdView mAdView=findViewById(R.id.adView);
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+
+            }
+        });
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            showGPSDisabledDialog();
+        }
+
+
         cameraToLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (locationLatLong != null)
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLong, 17f));
             }
@@ -127,6 +147,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 mGoogleMap.clear();
                 findViewById(R.id.mission_starter).setVisibility(View.INVISIBLE);
                 findViewById(R.id.statistics).setVisibility(View.VISIBLE);
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) cameraToLocation.getLayoutParams();
+                params.bottomMargin = getResources().getDimensionPixelSize(R.dimen._175sdp);
+                cameraToLocation.setLayoutParams(params);
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationLatLong, 15f));
                 mProjection = mGoogleMap.getProjection();
                 setBombs();
@@ -144,8 +167,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mViewModel.getProfile().observe(this, new Observer<Profile>() {
             @Override
             public void onChanged(Profile profile) {
-                mMission=mViewModel.getStopBombMission(profile);
-                mProfile=profile;
+                mMission = mViewModel.getStopBombMission(profile);
+                mProfile = profile;
             }
         });
 
@@ -176,7 +199,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.setMapStyle(new MapStyleOptions(getResources()
-                .getString(R.string.style_hjson)));
+                .getString(R.string.style_json)));
         mGoogleMap.setOnMarkerClickListener(this);
     }
 
@@ -269,7 +292,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Location.distanceBetween(locationLatLong.latitude, locationLatLong.longitude,
                     latLngs.get(i).latitude, latLngs.get(i).longitude,
                     results);
-            if (results[0] > mMission.getMissionLowerRanget() && results[0] < mMission.getMissionUpperRange())
+            if (results[0] > mMission.getMissionLowerRange() && results[0] < mMission.getMissionUpperRange())
                 allPickedPoints.add(new MarkerOptions()
                         .position(latLngs.get(i))
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
@@ -324,6 +347,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         seconds = 0;
         mViewModel.getUpdatedProfile();
         findViewById(R.id.statistics).setVisibility(View.INVISIBLE);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) cameraToLocation.getLayoutParams();
+        params.bottomMargin = getResources().getDimensionPixelSize(R.dimen._25sdp);
+        cameraToLocation.setLayoutParams(params);
         if (mService.getCountDownTimer() != null)
             mService.stopTimer();
     }
@@ -367,7 +393,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 }
             });
             quit.show();
-        } else{
+        } else {
             stopService(new Intent(this, RunService.class));
             super.onBackPressed();
         }
@@ -491,9 +517,28 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Location.distanceBetween(oldLocation.latitude, oldLocation.longitude,
                         loc.getLatitude(), loc.getLongitude(), results);
                 totalDistance = totalDistance + results[0];
-                polylines.add(mGoogleMap.addPolyline(new PolylineOptions().add(new LatLng(loc.getLatitude(), loc.getLongitude()), oldLocation).width(5).color(Color.rgb(85, 136, 163))));
+                polylines.add(mGoogleMap.addPolyline(new PolylineOptions().add(new LatLng(loc.getLatitude(), loc.getLongitude()), oldLocation).width(10).color(Color.rgb(85, 136, 163))));
             }
             oldLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
         }
     }
+
+    public void showGPSDisabledDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("GPS Disabled");
+        builder.setMessage("Gps is disabled, in order to use the application properly you need to enable GPS of your device");
+        builder.setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 55);
+            }
+        }).setNegativeButton("No, Just Exit", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.create().show();
+    }
+
 }

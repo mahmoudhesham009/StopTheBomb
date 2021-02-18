@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.target.runningapp.RunService;
+import com.target.runningapp.service.RunService;
 import com.target.runningapp.model.HistoryMission;
 import com.target.runningapp.model.Profile;
 import com.target.runningapp.model.StopBombMission;
@@ -143,15 +143,15 @@ public class MapViewModel extends ViewModel {
 
         switch (profile.getLevel()) {
             case 1:
-                return new StopBombMission(15, 1, 400, 200);
+                return new StopBombMission(10, 1, 600, 400);
             case 2:
-                return new StopBombMission(15, 1, 600, 400);
+                return new StopBombMission(13, 1, 800, 600);
             case 3:
-                return new StopBombMission(15, 2, 400, 200);
+                return new StopBombMission(15, 2, 500, 300);
             case 4:
                 return new StopBombMission(15, 2, 600, 400);
             case 5:
-                return new StopBombMission(10, 1, 1000, 600);
+                return new StopBombMission(10, 1, 1000, 800);
             case 6:
                 return new StopBombMission(10, 2, 600, 400);
             case 7:
@@ -159,7 +159,7 @@ public class MapViewModel extends ViewModel {
             case 8:
                 return new StopBombMission(15, 3, 600, 400);
             default:
-                return new StopBombMission(15, 3, 600, 400);
+                return new StopBombMission(15, 3, 700, 400);
         }
     }
 

@@ -25,7 +25,11 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name=".ProfileActivity" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6287586194486227~2514539971"/>
+
+        <activity android:name=".ui.ProfileActivity" />
         <activity android:name=".ui.MapActivity" />
         <activity android:name=".ui.IntroSliderActivity" />
         <activity android:name=".ui.SplashActivity">
@@ -38,7 +42,7 @@
         <activity android:name=".ui.CreateAccountActivity" />
         <activity android:name=".ui.AuthActivity" />
 
-        <service android:name=".RunService" />
+        <service android:name=".service.RunService" />
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-public class AuthRepository implements AuthRepositoryInterface {
+public class AuthRepository{
     MutableLiveData<FirebaseUser> userMutableLiveData;
     MutableLiveData<Boolean> checkMutableLiveData;
     MutableLiveData<Boolean> loadingMutableLiveData;
@@ -49,7 +49,6 @@ public class AuthRepository implements AuthRepositoryInterface {
         return loadingMutableLiveData;
     }
 
-    @Override
     public void createNewAccount(final String name, String email, String password) {
         if (!email.equals("") && !password.equals("") && !name.trim().equals("")) {
             loadingMutableLiveData.postValue(true);
@@ -80,7 +79,6 @@ public class AuthRepository implements AuthRepositoryInterface {
         }
     }
 
-    @Override
     public void logIn(String email, String password) {
         if (!email.equals("") && !password.equals("")) {
             loadingMutableLiveData.postValue(true);
@@ -98,13 +96,11 @@ public class AuthRepository implements AuthRepositoryInterface {
         }
     }
 
-    @Override
     public void signOut() {
         mAuth.signOut();
         userMutableLiveData.postValue(null);
     }
 
-    @Override
     public void checkIfAlreadyLogIn() {
         Boolean check = mAuth.getCurrentUser() != null;
         checkMutableLiveData.postValue(check);

@@ -3,17 +3,16 @@ package com.target.runningapp.model;
 public class StopBombMission {
     long time;
     int numOfMissions;
-    int level;
     int missionUpperRange;
-    int missionLowerRanget;
+    int missionLowerRange;
 
 
 
-    public StopBombMission(long time, int numOfMissions, int missionUpperRange, int missionLowerRanget) {
+    public StopBombMission(long time, int numOfMissions, int missionUpperRange, int missionLowerRange) {
         this.time = time;
         this.numOfMissions = numOfMissions;
         this.missionUpperRange = missionUpperRange;
-        this.missionLowerRanget = missionLowerRanget;
+        this.missionLowerRange = missionLowerRange;
     }
 
     public long getTime() {
@@ -28,7 +27,7 @@ public class StopBombMission {
         return missionUpperRange;
     }
 
-    public int getMissionLowerRanget() {
-        return missionLowerRanget;
+    public int getMissionLowerRange() {
+        return missionLowerRange;
     }
 }

@@ -1,9 +1,7 @@
 package com.target.runningapp.repositories;
 
-import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -27,15 +25,13 @@ import java.util.ArrayList;
 public class HistoryRepository {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference mDatabase;
-    MutableLiveData<ArrayList<HistoryMission>> historyLiveData=new MutableLiveData<>();
-    MutableLiveData<Boolean> updateLiveData=new MutableLiveData<>();
+    MutableLiveData<ArrayList<HistoryMission>> historyLiveData = new MutableLiveData<>();
+    MutableLiveData<Boolean> updateLiveData = new MutableLiveData<>();
     MutableLiveData<Profile> mProfileMutableLiveData = new MutableLiveData<>();
 
 
-
-
-    public HistoryRepository(){
-        firebaseDatabase=FirebaseDatabase.getInstance();
+    public HistoryRepository() {
+        firebaseDatabase = FirebaseDatabase.getInstance();
         mDatabase = firebaseDatabase.getReference("History");
     }
 
@@ -45,8 +41,8 @@ public class HistoryRepository {
         return instance;
     }
 
-    public void getHistory(){
-        final ArrayList<HistoryMission> historyMissions=new ArrayList<>();
+    public void getHistory() {
+        final ArrayList<HistoryMission> historyMissions = new ArrayList<>();
         mDatabase.child(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -54,12 +50,12 @@ public class HistoryRepository {
                     historyMissions.add(postSnapshot.getValue(HistoryMission.class));
                 }
                 historyLiveData.postValue(historyMissions);
-                Log.d("firefire","in call back");
+                Log.d("firefire", "in call back");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d("firefire","cancel call back");
+                Log.d("firefire", "cancel call back");
             }
         });
 
@@ -73,7 +69,7 @@ public class HistoryRepository {
         mDatabase.child(FirebaseAuth.getInstance().getUid()).push().setValue(history);
     }
 
-    public void changeUserPhoto(Uri uri){
+    public void changeUserPhoto(Uri uri) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -91,20 +87,21 @@ public class HistoryRepository {
     public LiveData<Boolean> getUpdateLiveData() {
         return updateLiveData;
     }
+
     public MutableLiveData<Profile> getProfileLiveData() {
         return mProfileMutableLiveData;
     }
 
-    public void getProfile(){
+    public void getProfile() {
         firebaseDatabase.getReference("profile").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    Profile profile=dataSnapshot.getValue(Profile.class);
+                if (dataSnapshot.exists()) {
+                    Profile profile = dataSnapshot.getValue(Profile.class);
                     mProfileMutableLiveData.postValue(profile);
-                }else {
-                    firebaseDatabase.getReference("profile").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new Profile(1,0));
-                    mProfileMutableLiveData.postValue(new Profile(1,0));
+                } else {
+                    firebaseDatabase.getReference("profile").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new Profile(1, 0));
+                    mProfileMutableLiveData.postValue(new Profile(1, 0));
                 }
             }
 
@@ -115,14 +112,12 @@ public class HistoryRepository {
         });
     }
 
-    public void updateProfile(Profile profile){
-        if(profile != null){
-            if(profile.getXp()>=100){
+    public void updateProfile(Profile profile) {
+        if (profile != null) {
+            profile.setXp(profile.getXp() + 10);
+            if (profile.getXp() >= 100) {
                 profile.setXp(0);
-                profile.setLevel(profile.getLevel()+1);
-            }else{
-                profile.setXp(profile.getXp()+10);
-
+                profile.setLevel(profile.getLevel() + 1);
             }
             firebaseDatabase.getReference("profile").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(profile);
         }

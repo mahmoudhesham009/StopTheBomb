@@ -1,4 +1,4 @@
-package com.target.runningapp;
+package com.target.runningapp.viewModel;
 
 import android.net.Uri;
 
@@ -19,18 +19,18 @@ public class ProfileViewModel extends ViewModel {
     MutableLiveData<Profile> mProfileMutableLiveData = new MutableLiveData<>();
 
 
-
     public void init() {
         historyRepository.getHistory();
         historyLiveData = historyRepository.getHistoryLiveData();
         updateLiveData = historyRepository.getUpdateLiveData();
-        mProfileMutableLiveData=historyRepository.getProfileLiveData();
+        mProfileMutableLiveData = historyRepository.getProfileLiveData();
 
     }
 
     public LiveData<Profile> getProfile() {
         return mProfileMutableLiveData;
     }
+
     public LiveData<ArrayList<HistoryMission>> getHistoryLiveData() {
         return historyLiveData;
     }
@@ -43,7 +43,7 @@ public class ProfileViewModel extends ViewModel {
         historyRepository.changeUserPhoto(data);
     }
 
-    public  void getUpdatedProfile(){
+    public void getUpdatedProfile() {
         historyRepository.getProfile();
     }
 
