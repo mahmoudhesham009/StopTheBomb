@@ -24,11 +24,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -42,10 +37,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.target.runningapp.R;
-import com.target.runningapp.service.RunService;
 import com.target.runningapp.model.HistoryMission;
 import com.target.runningapp.model.Profile;
 import com.target.runningapp.model.StopBombMission;
+import com.target.runningapp.service.RunService;
 import com.target.runningapp.viewModel.MapViewModel;
 
 import java.util.ArrayList;
@@ -88,7 +83,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     ArrayList<MarkerOptions> pickedPoints = new ArrayList<>();
     ArrayList<Marker> mMarkerBombs = new ArrayList<>();
     ArrayList<Marker> mStoppedBombs = new ArrayList<>();
-    ArrayList<Polyline> polylines = new ArrayList<>();
+    ArrayList<Polyline> polyLines = new ArrayList<>();
 
 
     Projection mProjection;
@@ -97,7 +92,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     LatLng oldLocation;
 
     float totalDistance = 0;
-    boolean missionSeted = false;
+    boolean missionSetted = false;
     boolean inMission = false;
 
 
@@ -115,15 +110,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mToolbar.setOnMenuItemClickListener(this);
 
 
-        AdView mAdView=findViewById(R.id.adView);
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-
-            }
-        });
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -252,8 +238,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 ArrayList<LatLng> availableLatLng = new ArrayList<>();
                 for (int i = 0; i < bitmap.getHeight(); i = i + 10) {
                     for (int j = 0; j < bitmap.getWidth(); j = j + 10) {
-                        Color pixelColor = bitmap.getColor(j, i);
-                        if (pixelColor.red() == pixelColor.green() && pixelColor.green() == pixelColor.blue() && pixelColor.blue() == 1) {
+                        int pixelColor = bitmap.getPixel(j, i);
+                        if (Color.red(pixelColor) == Color.green(pixelColor) && Color.green(pixelColor) == Color.blue(pixelColor) && Color.blue(pixelColor) == 255) {
                             availableLatLng.add(mProjection.fromScreenLocation(new Point(j, i)));
                         }
                     }
@@ -341,7 +327,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mGoogleMap.clear();
         inMission = false;
         mService.setInMission(false);
-        missionSeted = false;
+        missionSetted = false;
         oldLocation = null;
         totalDistance = 0;
         seconds = 0;
@@ -405,11 +391,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onChanged(ArrayList<Location> location) {
                 locationLatLong = new LatLng(location.get(mService.getTrack().size() - 1).getLatitude(), location.get(mService.getTrack().size() - 1).getLongitude());
-                if (!missionSeted && !inMission) {
+                if (!missionSetted && !inMission) {
                     setMissions(locationLatLong);
                     mGoogleMap.setMyLocationEnabled(true);
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(locationLatLong, 17f));
-                    missionSeted = true;
+                    missionSetted = true;
                 }
 
                 if (inMission) {
@@ -506,10 +492,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         totalDistance = 0;
         oldLocation = null;
 
-        for (Polyline line : polylines) {
+        for (Polyline line : polyLines) {
             line.remove();
         }
-        polylines.clear();
+        polyLines.clear();
 
         for (Location loc : track) {
             if (oldLocation != null) {
@@ -517,7 +503,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 Location.distanceBetween(oldLocation.latitude, oldLocation.longitude,
                         loc.getLatitude(), loc.getLongitude(), results);
                 totalDistance = totalDistance + results[0];
-                polylines.add(mGoogleMap.addPolyline(new PolylineOptions().add(new LatLng(loc.getLatitude(), loc.getLongitude()), oldLocation).width(10).color(Color.rgb(85, 136, 163))));
+                polyLines.add(mGoogleMap.addPolyline(new PolylineOptions().add(new LatLng(loc.getLatitude(), loc.getLongitude()), oldLocation).width(10).color(Color.rgb(85, 136, 163))));
             }
             oldLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
         }
